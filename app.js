@@ -2,6 +2,28 @@ require("dotenv").config();
 
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
+const express = require('express');
+const cors = require('cors');
+const leaderboardRouter = require('./routes/leaderboardRouter');
+const apiAuth = require('./middleware/apiAuth'); // ✅ Add this line
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// 🔐 Require API key on all requests
+app.use(apiAuth);
+
+// 👇 Mount your routers after auth
+app.use('/leaderboard', leaderboardRouter);
+
+app.get('/', (req, res) => {
+  res.send('ArcadeHaven API is up!');
+});
+
+module.exports = app;
+
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
